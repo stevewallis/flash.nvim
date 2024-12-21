@@ -11,7 +11,8 @@ local M = {}
 
 ---@param win number
 ---@param pos? Pos
-function M.get_nodes(win, pos)
+---@param opts Flash.State.Config
+function M.get_nodes(win, pos, opts)
   local buf = vim.api.nvim_win_get_buf(win)
   local line_count = vim.api.nvim_buf_line_count(buf)
   pos = pos or Pos()
@@ -31,6 +32,7 @@ function M.get_nodes(win, pos)
     return {}
   end
 
+  local ignore_injections = opts.modes.treesitter.ignore_injections
   do
     parser:for_each_tree(function(tstree, tree)
       if not tstree then
@@ -38,7 +40,7 @@ function M.get_nodes(win, pos)
       end
       -- get all ranges of the current node and its parents
       local node = tree:named_node_for_range({ pos[1] - 1, pos[2], pos[1] - 1, pos[2] }, {
-        ignore_injections = true,
+        ignore_injections = ignore_injections,
       })
 
       while node do
@@ -97,7 +99,7 @@ end
 ---@param state Flash.State
 function M.matcher(win, state)
   local labels = state:labels()
-  local ret = M.get_nodes(win, state.pos)
+  local ret = M.get_nodes(win, state.pos, state.opts)
 
   for i = 1, #ret do
     ret[i].label = table.remove(labels, 1)
@@ -161,7 +163,7 @@ function M.search(opts)
         -- don't add labels to the search results
         m.label = false
         table.insert(matches, m)
-        for _, n in ipairs(M.get_nodes(win, m.pos)) do
+        for _, n in ipairs(M.get_nodes(win, m.pos, _state.opts)) do
           -- don't highlight treesitter nodes. Use labels only
           n.highlight = false
           table.insert(matches, n)

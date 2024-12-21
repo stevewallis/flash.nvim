@@ -223,6 +223,7 @@ local defaults = {
         backdrop = false,
         matches = false,
       },
+      ignore_injections = true,
     },
     treesitter_search = {
       jump = { pos = "range" },
