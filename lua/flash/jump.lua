@@ -58,7 +58,6 @@ end
 ---@return Flash.Match?
 function M.remote_op(match, state, register)
   Util.exit()
-
   -- schedule this so that the  active operator is properly cancelled
   vim.schedule(function()
     local motion = state.opts.remote_op.motion
